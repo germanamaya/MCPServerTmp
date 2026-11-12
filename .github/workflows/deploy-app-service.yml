@@ -1,0 +1,50 @@
+name: Deploy MCPServer to App Service
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Check publish profile secret
+        env:
+          AZUREAPPSERVICE_PUBLISHPROFILE: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
+        run: |
+          if [ -z "$AZUREAPPSERVICE_PUBLISHPROFILE" ]; then
+            echo "::error::Add the AZUREAPPSERVICE_PUBLISHPROFILE repository secret before deploying."
+            exit 1
+          fi
+
+      - name: Restore
+        run: dotnet restore MCPServer.sln
+
+      - name: Test
+        run: dotnet test MCPServer.sln --configuration Release --no-restore
+
+      - name: Publish web app
+        run: dotnet publish src/MCPServer/MCPServer.csproj --configuration Release --no-restore --output "${{ runner.temp }}/mcpserver-publish"
+
+      - name: Create deployment package
+        run: |
+          cd "${{ runner.temp }}/mcpserver-publish"
+          zip -r "${{ runner.temp }}/mcpserver.zip" .
+
+      - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: mcpservertmp
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
+          package: ${{ runner.temp }}/mcpserver.zip
