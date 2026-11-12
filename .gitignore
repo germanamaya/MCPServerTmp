@@ -1,0 +1,28 @@
+# Environment and local-only configuration
+.env
+.env.*
+!.env.example
+local.settings.json
+appsettings.Local.json
+appsettings.*.Local.json
+secrets.json
+
+# Build output
+bin/
+obj/
+publish/
+artifacts/
+
+# Test output
+TestResults/
+coverage/
+*.trx
+*.coverage
+coverage.cobertura.xml
+
+# IDE and OS
+.vs/
+.idea/
+*.user
+*.suo
+.DS_Store

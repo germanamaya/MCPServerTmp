@@ -1,0 +1,86 @@
+@baseUrl = http://localhost:5000
+# Access token issued by the configured authority for this server's audience.
+@token = <paste-access-token>
+
+### Liveness
+GET {{baseUrl}}/health/live
+
+### Readiness (503 until Authentication settings are configured)
+GET {{baseUrl}}/health/ready
+
+### Sign-in metadata for MCP clients
+GET {{baseUrl}}/.well-known/oauth-protected-resource/mcp
+
+### Current user
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{token}}
+
+### MCP without a token (401 with a WWW-Authenticate challenge)
+POST {{baseUrl}}/mcp
+Content-Type: application/json
+Accept: application/json, text/event-stream
+
+{ "jsonrpc": "2.0", "id": 1, "method": "tools/list" }
+
+### MCP initialize
+POST {{baseUrl}}/mcp
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json, text/event-stream
+
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "initialize",
+  "params": {
+    "protocolVersion": "2025-06-18",
+    "capabilities": {},
+    "clientInfo": { "name": "http-file", "version": "1.0.0" }
+  }
+}
+
+### MCP list tools
+POST {{baseUrl}}/mcp
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json, text/event-stream
+MCP-Protocol-Version: 2025-06-18
+
+{ "jsonrpc": "2.0", "id": 2, "method": "tools/list" }
+
+### MCP call echo
+POST {{baseUrl}}/mcp
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json, text/event-stream
+MCP-Protocol-Version: 2025-06-18
+
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "tools/call",
+  "params": { "name": "echo", "arguments": { "text": "hello" } }
+}
+
+### MCP call get_current_time
+POST {{baseUrl}}/mcp
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json, text/event-stream
+MCP-Protocol-Version: 2025-06-18
+
+{
+  "jsonrpc": "2.0",
+  "id": 4,
+  "method": "tools/call",
+  "params": { "name": "get_current_time", "arguments": {} }
+}
+
+### MCP server stream (405: the server is stateless)
+GET {{baseUrl}}/mcp
+Authorization: Bearer {{token}}
+Accept: text/event-stream
+
+### MCP end session (405: the server is stateless)
+DELETE {{baseUrl}}/mcp
+Authorization: Bearer {{token}}
