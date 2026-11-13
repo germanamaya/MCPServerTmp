@@ -17,6 +17,6 @@ The publish profile is a privileged deployment credential. Limit who can read re
 1. In GitHub, open **Actions → Deploy MCPServer to App Service**.
 2. Select **Run workflow**, choose the branch to deploy, and start it.
 3. The workflow restores and tests `MCPServer.sln`, publishes only `src/MCPServer/MCPServer.csproj` in Release configuration, and deploys the package to `mcpservertmp`.
-4. After a successful run, use the App Service's HTTPS hostname with `/health/live` and `/mcp`.
+4. After a successful run, verify that `https://<app-service-host>/health/live` returns `200` and `{"status":"ok"}`. The MCP endpoint is `https://<app-service-host>/mcp`; call it with an MCP client using Streamable HTTP and a valid bearer token. Opening the site root or `/mcp` in a browser without a token returns `401` by design.
 
 The workflow does not create Azure resources or change App Service settings, Entra app registrations, app roles, or role assignments. Configure runtime authentication settings separately in App Service before expecting `/health/ready` or authenticated MCP calls to succeed. The local `ASPNETCORE_URLS=http://localhost:5000` value is not needed in App Service.

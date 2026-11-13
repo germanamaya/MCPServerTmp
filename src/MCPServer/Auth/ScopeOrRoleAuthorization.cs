@@ -10,7 +10,9 @@ namespace MCPServer.Auth;
 /// </summary>
 internal sealed class ScopeOrRoleRequirement : IAuthorizationRequirement;
 
-internal sealed class ScopeOrRoleAuthorizationHandler(IOptions<AuthSettings> settings)
+internal sealed class ScopeOrRoleAuthorizationHandler(
+    IOptions<AuthSettings> settings,
+    ILogger<ScopeOrRoleAuthorizationHandler> logger)
     : AuthorizationHandler<ScopeOrRoleRequirement>
 {
     protected override Task HandleRequirementAsync(
@@ -34,7 +36,17 @@ internal sealed class ScopeOrRoleAuthorizationHandler(IOptions<AuthSettings> set
             || acceptedRoles.Any(tokenRoles.Contains))
         {
             context.Succeed(requirement);
+            return Task.CompletedTask;
         }
+
+        logger.LogWarning(
+            "MCP authorization denied. ObjectId={ObjectId}; Audiences={Audiences}; TokenScopes={TokenScopes}; TokenRoles={TokenRoles}; ExpectedScopes={ExpectedScopes}; ExpectedRoles={ExpectedRoles}",
+            context.User.FindFirst(TokenClaims.ObjectId)?.Value,
+            string.Join(" ", context.User.FindAll("aud").Select(claim => claim.Value)),
+            string.Join(" ", tokenScopes),
+            string.Join(" ", tokenRoles),
+            string.Join(" ", acceptedScopes),
+            string.Join(" ", acceptedRoles));
 
         return Task.CompletedTask;
     }

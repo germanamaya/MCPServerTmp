@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using MCPServer.Auth;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Shouldly;
 
@@ -40,7 +41,9 @@ public class ScopeOrRoleAuthorizationHandlerTests
         var user = new ClaimsPrincipal(new ClaimsIdentity(claims, authenticationType: "test"));
         var context = new AuthorizationHandlerContext([requirement], user, resource: null);
 
-        await new ScopeOrRoleAuthorizationHandler(Options.Create(settings)).HandleAsync(context);
+        await new ScopeOrRoleAuthorizationHandler(
+            Options.Create(settings),
+            NullLogger<ScopeOrRoleAuthorizationHandler>.Instance).HandleAsync(context);
 
         return context.HasSucceeded;
     }
