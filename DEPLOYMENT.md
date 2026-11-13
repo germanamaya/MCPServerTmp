@@ -2,6 +2,8 @@
 
 The GitHub Actions workflow deploys the `src/MCPServer` .NET 10 application to the existing Windows App Service `mcpservertmp`. It runs only when manually started; it does not deploy on push.
 
+For the detailed Spanish walkthrough covering Entra configuration, project managed identity app-role assignment, deployment, Foundry setup, and the token-cache issue resolved in this environment, see [Manual: App Service and Microsoft Foundry](./MANUAL-APP-SERVICE-FOUNDRY.md).
+
 ## Configure the publish profile
 
 1. In the Azure portal, open App Service `mcpservertmp` and go to **Configuration → General settings**.
